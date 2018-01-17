@@ -5,23 +5,6 @@ import sys
 RIGHT = 1
 LEFT = 0
 
-class Node:
-	
-	def __init__(self, child1, child2, letter):
-		if child1!= None and child2!= None:
-			self._children = []
-			self._children.append(child1)
-			self._children.append(child2)
-		else:
-			self._children = None
-		
-		self._letter = letter
-		
-		print "creating node for letter " + letter + " which has children ? " + str(self.hasChildren())
-	
-	def hasChildren(self):
-		return self._children != None
-		
 		
 def encode(alphabet_length, word):
 	
@@ -34,6 +17,7 @@ def encode(alphabet_length, word):
 	for letter in word:
 		dict[letter] += 1
 	
+	#print(dict)
 
 	dict = sorted(dict.items(), key = lambda x: x[1], reverse = True)
 	
@@ -43,51 +27,68 @@ def encode(alphabet_length, word):
 	dict.append(t)
 	
 	
-	pile = []
-	while len(dict)!=0:
-		t=dict.pop()
-		node = Node(None, None, t[0])
-		pile.insert(0, (node, t[1]))
-		print "value = " + str(t[1])
-	print
+
+	while len(dict)>1:
+		node1, value1 = dict.pop()
+		node2, value2 = dict.pop()
+		node3 = (node1, node2)
+		dict.append((node3, value1 + value2))
+		dict = sorted(dict, key = lambda x: x[1], reverse = True)
 	
-	n = 0
-	while len(pile)>1:
-		node1, value1 = pile.pop()
-		node2, value2 = pile.pop()
-		node3 = Node(node1, node2, str(n) )
-		n +=1
-		print "with children " + node1._letter + " and " + node2._letter + " of combined value " + str(value1 + value2) 
-		print
-		pile.append((node3, value1 + value2))
-		pile = sorted(pile, key = lambda x: x[1], reverse = True)
+	tree, tot = dict.pop()
 	
-	tree, tot = pile.pop()
-	
-	def recursivePrint(node):
-		if node.hasChildren():
-			recursivePrint(node._children[0])
-			print node._letter,
-			recursivePrint(node._children[1])
+	Tree = tree
+
+	print tree
+		
+	dict = {}
+	def buildCodeDict(dict, node, code):
+		if type(node) is str:
+			temp1 = list(code)
+			dict[node] = temp1
 		else:
-			print node._letter,
+			temp1 = list(code)
+			temp1.append(LEFT)
+			buildCodeDict(dict, node[LEFT], temp1)
+			temp2 = list(code)
+			temp2.append(RIGHT)
+			buildCodeDict(dict, node[RIGHT], temp2)
 	
-	recursivePrint(tree)
-		
-		
-		
+	buildCodeDict(dict, tree, [])
 	
+	#print(dict)
 	
 	
 	code = []
+	code.append(str(tree))
+	for letter in word :
+		temp = dict[letter]
+		for t  in temp:
+			code.append(t)
+	
 	return code
 
 def decode(alphabet_length, code):
+	
 	word = ""
+	
+	tree = eval(code[0])
+	node = tree
+	for t in code[1:]:
+		node = node[t]
+		if type(node) is str:
+			temp = node
+			node = tree
+			word += temp
+			
+	
+	#print tree
 	return word 
 
 
-encode(26, "ILOVEROCKNROLL")
+hello = encode(26, "ILOVEROCKNROLLPUTANOTHERDIMEINTHEJUKEBOXBABY")
+print decode(26, hello)
+
 	
 #print("code :"),
 #for t in code :
