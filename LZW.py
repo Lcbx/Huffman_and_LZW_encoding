@@ -1,46 +1,46 @@
 import string
 
 
-def encode(alphabet_length, word):
+def encode(word):
 	size = 0
-	dict ={}
-	for letter in xrange(alphabet_length):
-		dict[string.ascii_uppercase[letter]] = size
+	symbols ={}
+	for letter in string.printable:
+		symbols[letter] = size
 		size+=1
 
 	code = []
 	P = ""
 	for c in word:
 		temp = P+c
-		if temp in dict:
+		if temp in symbols:
 			P = temp
 		else:
-			code.append(dict[P])
-			dict[temp] = size
+			code.append(symbols[P])
+			symbols[temp] = size
 			size += 1
 			P = c
-	code.append(dict[P])
+	code.append(symbols[P])
 	
-	return code #, dict
+	return code #, symbols
 
-def decode(alphabet_length, code):
+def decode(code):
 	word = ""
 
 	size = 0
-	dict = []
-	for letter in xrange(alphabet_length):
-		dict.append(string.ascii_uppercase[letter])
+	symbols = []
+	for letter in string.printable:
+		symbols.append(letter)
 		size += 1
 
 	P = None
 	for c in code :
-		word += dict[c]
+		word += symbols[c]
 		if P != None :
-			dict.append(dict[P] + dict[c][0])
+			symbols.append(symbols[P] + symbols[c][0])
 			size += 1
 		P = c
 	
-	return word #, dict
+	return word #, symbols
 
 
 
@@ -50,9 +50,9 @@ def decode(alphabet_length, code):
 #	print(t),
 #print
 
-#print("dict :")
-#for t in sorted(dict) :
-#	print t + " : " + str(dict[t]) + ", ",
+#print("symbols :")
+#for t in sorted(symbols) :
+#	print t + " : " + str(symbols[t]) + ", ",
 #print
 
 #print("word : " + word )

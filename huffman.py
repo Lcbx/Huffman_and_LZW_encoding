@@ -7,36 +7,31 @@ RIGHT = '0b1'
 LEFT = '0b0'
 
 		
-def encode(alphabet_length, word):
+def encode(word):
 	
-	# constructs the initial dictionnary with all possible simbols
-	size = 0
-	symbols ={}
-	for letter in xrange(alphabet_length):
-		symbols[string.ascii_uppercase[letter]] = 0
-		size+=1
+	# a dictionnary for all possible symbol
+	symbols = {}
 	
 	# counts the number of occurences each symbol
 	for letter in word:
-		symbols[letter] += 1
+		if letter in symbols:
+			symbols[letter] += 1
+		else :
+			symbols[letter] = 1
 	
 #print(dict)
 	
-	# sort symbols by number of occurences
-	symbols = sorted(symbols.items(), key = lambda x: x[1], reverse = True)
-	
-	# get rid of symbols that don't appear
-	t = symbols.pop()
-	while t[1] == 0:
-		t = symbols.pop()
-	symbols.append(t)
-	
-	
 	## here we construct the binary tree with tuples :
 	
-	pile = symbols
+	# sort symbols by number of occurences
+	pile = symbols.items()
 	# while we don't have a lone root node
 	while len(pile)>1:
+		
+		# sort symbols by number of occurences
+		pile = sorted(pile, key = lambda x: x[1], reverse = True)
+		
+		# note : the leaves are the symbols themselves while intermediary nodes are tuples
 		
 		# get the two nodes with the least total occurences
 		node1, value1 = pile.pop()
@@ -48,13 +43,8 @@ def encode(alphabet_length, word):
 		# we add it to the pile with its associated total value
 		pile.append((node3, value1 + value2))
 		
-		# note : the leaves are the symbols themselves while intermediary nodes are tuples
 		
-		# sort them so we get the two nodes with the least total occurences next iteration
-		pile = sorted(pile, key = lambda x: x[1], reverse = True)
-	
-	
-	# the root node, we discard the occurence count now
+	# the last item is the root node (no need for the occurence count now)
 	tree, tot = pile.pop()
 
 #print tree
@@ -109,7 +99,7 @@ def encode(alphabet_length, word):
 	
 	
 	
-def decode(alphabet_length, code):
+def decode(code):
 	
 	
 #print code
@@ -163,8 +153,7 @@ def decode(alphabet_length, code):
 	return word 
 
 
-hello = encode(26, "ILOVEROCKNROLLPUTANOTHERDIMEINTHE")
-print decode(26, hello)
+	
 
 	
 #print("code :"),
