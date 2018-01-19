@@ -1,14 +1,21 @@
 import string
+from bitstring import BitArray, BitStream
 
+BITS_INDEX = 12
 
 def encode(word):
+	
+	# we build a dictionnary with all possible symbols and an associated number
 	size = 0
 	symbols ={}
 	for letter in string.printable:
-		symbols[letter] = size
+		bits = BitArray(BITS_INDEX)
+		bits.int = size
+		symbols[letter] = bits
 		size+=1
-
-	code = []
+	
+	
+	code = BitArray()
 	P = ""
 	for c in word:
 		temp = P+c
@@ -16,28 +23,35 @@ def encode(word):
 			P = temp
 		else:
 			code.append(symbols[P])
-			symbols[temp] = size
+			bits = BitArray(BITS_INDEX)
+			bits.int = size
+			symbols[temp] = bits
 			size += 1
 			P = c
 	code.append(symbols[P])
 	
-	return code #, symbols
+	
+	return code.tobytes()
 
 def decode(code):
+	
+	bitCode = BitStream(bytes = code )
+	offsets = []
+	for i in xrange(len(code)*8/BITS_INDEX):
+		bits = bitCode.read("uint:"+ str(BITS_INDEX))
+		offsets.append(bits)
+	
 	word = ""
 
-	size = 0
 	symbols = []
 	for letter in string.printable:
 		symbols.append(letter)
-		size += 1
 
 	P = None
-	for c in code :
+	for c in offsets:
 		word += symbols[c]
 		if P != None :
 			symbols.append(symbols[P] + symbols[c][0])
-			size += 1
 		P = c
 	
 	return word #, symbols
