@@ -1,7 +1,7 @@
 import string
 from bitstring import BitArray, BitStream
 
-BITS_INDEX = 12
+BITS_INDEX = 11
 
 def encode(word):
 	
@@ -15,7 +15,7 @@ def encode(word):
 		size+=1
 	
 	
-	code = BitArray()
+	code = BitStream()
 	P = ""
 	for c in word:
 		temp = P+c
@@ -31,14 +31,13 @@ def encode(word):
 	code.append(symbols[P])
 	
 	
-	return code.tobytes()
+	return code
 
 def decode(code):
 	
-	bitCode = BitStream(bytes = code )
 	offsets = []
-	for i in xrange(len(code)*8/BITS_INDEX):
-		bits = bitCode.read("uint:"+ str(BITS_INDEX))
+	for i in xrange(len(code)/BITS_INDEX):
+		bits = code.read("uint:"+ str(BITS_INDEX))
 		offsets.append(bits)
 	
 	word = ""
@@ -54,7 +53,7 @@ def decode(code):
 			symbols.append(symbols[P] + symbols[c][0])
 		P = c
 	
-	return word #, symbols
+	return word
 
 
 
