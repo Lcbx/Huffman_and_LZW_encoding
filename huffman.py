@@ -90,17 +90,20 @@ def encode(word):
 	
 	# here we construct the binary tree with tuples :
 	tree = buildTree(symbols)
-	treeString = str(tree)
 	
-	# the code we'll return
+	# we have to return the tree too for decoding later
+	# we could encode it better, but its native string representation is ok
+	treeString = str(tree)
+	treeString = treeString.replace(", ", ",")
+	
+	# the code we'll return, which first contains the length taken by the tree
 	code = BitStream(12)
 	code.int = len(treeString)
 	
 	
-	# we have to return the tree too for decoding later
+	# then we add the tree to the code
 	codedTree = BitArray(8 * len(treeString))
 	codedTree.bytes = treeString
-	
 	code.append(codedTree)
 	
 	# a recursive traversal of the tree allows us to create a dictionnary of matching symbols and codes for encoding :
@@ -154,19 +157,3 @@ def decode(code):
 		
 	
 	return word 
-
-
-	
-
-	
-#print("code :"),
-#for t in code :
-#	print(t),
-#print
-
-#print("dict :")
-#for t in sorted(dict) :
-#	print t + " : " + str(dict[t]) + ", ",
-#print
-
-#print("word : " + word )

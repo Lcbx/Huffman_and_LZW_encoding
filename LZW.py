@@ -1,7 +1,7 @@
 import string
 from bitstring import BitArray, BitStream
 
-BITS_INDEX = 11
+BITS_INDEX = 16
 
 def encode(word):
 	
