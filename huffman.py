@@ -15,7 +15,7 @@ def buildTree(symbols):
 		# sort symbols by number of occurences
 		pile = sorted(pile, key = lambda x: x[1], reverse = True)
 		
-		# note : the leaves are the symbols themselves while intermediary nodes are tuples
+		# NOTE : the leaves are the symbols themselves while intermediary nodes are tuples
 		
 		# get the two nodes with the least total occurences
 		nodeLeft, valueLeft = pile.pop()
