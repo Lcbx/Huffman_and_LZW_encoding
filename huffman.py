@@ -3,6 +3,92 @@ from bitstring import BitArray, BitStream
 
 
 
+def encode(word):
+	
+	# a dictionnary for all possible symbol
+	symbols = {}
+	
+	# counts the number of occurences each symbol
+	for letter in word:
+		if letter in symbols:
+			symbols[letter] += 1
+		else :
+			symbols[letter] = 1
+	
+	
+	# here we construct the binary tree with tuples :
+	tree = buildTree(symbols)
+	
+	# we have to return the tree too for decoding later
+	# we could encode it better, but its native string representation is ok
+	treeString = str(tree)
+	treeString = treeString.replace(", ", ",")
+	
+	# the code we'll return, which first contains the length taken by the tree
+	code = BitStream(12)
+	code.int = len(treeString)
+	
+	
+	# then we add the tree to the code
+	codedTree = BitArray(8 * len(treeString))
+	codedTree.bytes = treeString
+	code.append(codedTree)
+	
+	# a recursive traversal of the tree allows us to create a dictionnary of matching symbols and codes for encoding :
+	symbols = buildEncodingDict(tree)
+	
+	# finally we encode the word
+	codedWord = encodeWithDict(symbols, word)
+	
+	code.append(codedWord)
+	
+	return code
+
+	
+	
+	
+def decode(code):
+	
+	# at the beginning of the code is a represetation of the encoding tree
+	# we find it thanks to the "#" character that ends it
+	
+	length = code.read("uint:12")
+	
+	tree = code.read("bytes:" + str(length))
+	
+	
+	# a simple evaluation builds it
+	tree = eval(tree)
+	
+	
+	# we cast the remaining data as bits
+	code = code.read("bits")
+	
+	
+	
+	# all that's left is to interpret the bits with the tree
+	word = ""
+	node = tree
+	# for each bit
+	for t in code :
+		 # we iterate through the corresponding child node
+		 node = node[t]
+		 # if its a leaf node
+		 if type(node) is str:
+			 # we find the corresponding char
+			 temp = node
+			 # reset our place in the interpreting tree
+			 node = tree
+			 # add the char to the final word
+			 word += temp
+		
+	
+	return word 
+	
+
+	
+	
+	
 	
 def buildTree(symbols):
 
@@ -73,87 +159,3 @@ def encodeWithDict(dictionnary, word):
 		temp = dictionnary[letter]
 		codedWord.append(temp)
 	return codedWord	
-
-
-def encode(word):
-	
-	# a dictionnary for all possible symbol
-	symbols = {}
-	
-	# counts the number of occurences each symbol
-	for letter in word:
-		if letter in symbols:
-			symbols[letter] += 1
-		else :
-			symbols[letter] = 1
-	
-	
-	# here we construct the binary tree with tuples :
-	tree = buildTree(symbols)
-	
-	# we have to return the tree too for decoding later
-	# we could encode it better, but its native string representation is ok
-	treeString = str(tree)
-	treeString = treeString.replace(", ", ",")
-	
-	# the code we'll return, which first contains the length taken by the tree
-	code = BitStream(12)
-	code.int = len(treeString)
-	
-	
-	# then we add the tree to the code
-	codedTree = BitArray(8 * len(treeString))
-	codedTree.bytes = treeString
-	code.append(codedTree)
-	
-	# a recursive traversal of the tree allows us to create a dictionnary of matching symbols and codes for encoding :
-	symbols = buildEncodingDict(tree)
-	
-	# finally we encode the word
-	codedWord = encodeWithDict(symbols, word)
-	
-	code.append(codedWord)
-	
-	return code
-
-
-	
-	
-	
-def decode(code):
-	
-	# at the beginning of the code is a represetation of the encoding tree
-	# we find it thanks to the "#" character that ends it
-	
-	length = code.read("uint:12")
-	
-	tree = code.read("bytes:" + str(length))
-	
-	
-	# a simple evaluation builds it
-	tree = eval(tree)
-	
-	
-	# we cast the remaining data as bits
-	code = code.read("bits")
-	
-	
-	
-	# all that's left is to interpret the bits with the tree
-	word = ""
-	node = tree
-	# for each bit
-	for t in code :
-		 # we iterate through the corresponding child node
-		 node = node[t]
-		 # if its a leaf node
-		 if type(node) is str:
-			 # we find the corresponding char
-			 temp = node
-			 # reset our place in the interpreting tree
-			 node = tree
-			 # add the char to the final word
-			 word += temp
-		
-	
-	return word 
