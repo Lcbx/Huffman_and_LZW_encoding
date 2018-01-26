@@ -7,11 +7,13 @@ BITS_INDEX = 16
 
 def encode(word):
 	
+	currentBitIndex = BITS_INDEX
+	
 	# we build a dictionnary with all possible symbols and associate each of them with a number
 	size = 0
 	symbols ={}
 	for letter in string.printable:
-		bits = BitArray(BITS_INDEX)
+		bits = BitArray(currentBitIndex)
 		bits.int = size
 		symbols[letter] = bits
 		size+=1
@@ -24,7 +26,7 @@ def encode(word):
 	
 	# for each character in the word we are encoding
 	for c in word:
-	
+		
 		# we add it to the sequence we are currently considering
 		temp = sequence + c
 		
@@ -39,10 +41,12 @@ def encode(word):
 			code.append(symbols[sequence])
 			
 			# and add the new sequence to our dictionnary of known sequences
-			bits = BitArray(BITS_INDEX)
-			bits.int = size
+			bits = BitArray(currentBitIndex)
+			bits.uint = size
 			symbols[temp] = bits
 			size += 1
+			
+			#if len(symbols) >= pow(2, currentBitIndex-1): currentBitIndex +=1
 			
 			# the sequence is reset to only the new character
 			sequence = c
@@ -55,11 +59,7 @@ def encode(word):
 
 def decode(code):
 	
-	# we create a list of integers using the collection of bits we've been given
-	offsets = []
-	for i in xrange(len(code)/BITS_INDEX):
-		bits = code.read("uint:"+ str(BITS_INDEX))
-		offsets.append(bits)
+	currentBitIndex = BITS_INDEX
 	
 	# the string we'll  return
 	word = ""
@@ -70,19 +70,38 @@ def decode(code):
 	for letter in string.printable:
 		symbols.append(letter)
 	
-	# the considereed sequence
+	# the previous sequence
 	sequence = None
 	
-	# for each number in the code
-	for i in offsets:
+	# number of bits to read
+	bits = len(code)
+	
+	# while there are still bits to read
+	while bits >0 :
+		
+		bits -= currentBitIndex
+		
+		# we read the current number in code
+		i = code.read("uint:" + str(currentBitIndex))
+		
+		#temp = BitArray(currentBitIndex)
+		#temp.uint = i
+		#print temp
+		
+		#print word
+		
+		#print len(symbols) 
 		
 		# we add its corresponding sequence from our list
 		word += symbols[i]
 		
 		# if there was a previous sequence
 		if sequence != None :
-			# we build a new sequence to our known ones
+			# we build a new sequence and add it to our known ones
+			# by concatenation  of the previous sequence and the first character of the current one
 			symbols.append(symbols[sequence] + symbols[i][0])
+			
+			#if len(symbols) >= pow(2, currentBitIndex-1): currentBitIndex +=1
 		
 		# we reset our considered sequence to be c
 		sequence = i
