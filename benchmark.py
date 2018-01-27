@@ -10,7 +10,9 @@ def testEncodingDecoding(algorithm, sample ):
 	print algorithm.__name__ + " : " + str( algorithm.decode(algorithm.encode(sample)) == sample )
 	
 def benchmark(algorithm, sample):
-	print "compression ratio : " + str(len(sample)*8) + " / "+ str(len(algorithm.encode(sample))) + " (algorithm : " + algorithm.__name__ +")"
+	originalBitSize = len(sample)*8
+	compressedSize = len(algorithm.encode(sample))
+	print "compression ratio : " + str(originalBitSize) + " / "+ str(compressedSize) + " = " + str(originalBitSize/float(compressedSize))+ " (" +algorithm.__name__ +")"
 
 random.seed(1286)
 def generateRandomString(length = 0, alphabet_size = 0):
