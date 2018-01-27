@@ -4,15 +4,13 @@ import huffman
 import string
 import random
 
+import samples
 
-def testEncodingDecoding(algorithm, word ):
-	print "    " + algorithm.__name__
-	code = algorithm.encode(word)
-	print "\t code : \n" + str(code) + "\n" + str(len(code)/8) + "\n"
-	result = algorithm.decode(code)
-	print "\t result of decoding : \n" + result + "\n" + str(len(result)) + "\n"
+def testEncodingDecoding(algorithm, sample ):
+	print algorithm.__name__ + " : " + str( algorithm.decode(algorithm.encode(sample)) == sample )
 	
-
+def benchmark(algorithm, sample):
+	print "compression ratio : " + str(len(sample)*8) + " / "+ str(len(algorithm.encode(sample))) + " (algorithm : " + algorithm.__name__ +")"
 
 random.seed(1286)
 def generateRandomString(length = 0, alphabet_size = 0):
@@ -26,11 +24,37 @@ def generateRandomString(length = 0, alphabet_size = 0):
 	return word
 
 
+algorithms = [LZW, huffman]
 
-word = generateRandomString(500, 26)
 
-print word + "\n" + str(len(word)) + "\n"
-testEncodingDecoding(LZW, word)
-testEncodingDecoding(huffman, word)
-	
-	
+
+
+print "FAITHFULL ?"
+for algorithm in algorithms:
+		testEncodingDecoding(algorithm, samples.small)
+print
+
+
+print "WRITTEN TEXT"
+for sample in samples.list :
+	for algorithm in algorithms:
+		benchmark(algorithm, sample)
+print
+
+		
+print "RANDOM"
+for j in range(3):
+	if j == 0 :
+		alphabet_size = 3
+		print "\t small alphabet"
+	if j == 1 :
+		alphabet_size = 40
+		print "\t medium alphabet"
+	if j == 2 :
+		alphabet_size = 98
+		print "\t large alphabet"
+	for i in range(4):
+		length= pow(20, i+1)
+		sample = generateRandomString(length, alphabet_size)
+		for algorithm in algorithms:
+			benchmark(algorithm, sample)
