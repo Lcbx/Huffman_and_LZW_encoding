@@ -66,7 +66,10 @@ def decode(code):
 	previous = None
 	
 	# while there are still bits to read
-	for _ in xrange(len(code)/BITS_USED) :
+	readBits = 0
+	while readBits < len(code):
+		
+		readBits += BITS_USED
 		
 		# we read the current number in code
 		i = code.read("uint:" + str(BITS_USED))
@@ -93,8 +96,6 @@ def decode(code):
 			
 		# we reset our considered sequence to be c
 		previous = i		
-	
-	print "len(symbols) = " + str(len(symbols))
 	
 	# NOTE : keep in mind that we are decompressing, so we are not iterating character by character like in encode(), but sequence by sequence
 	
