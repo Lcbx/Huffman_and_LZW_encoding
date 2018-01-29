@@ -13,7 +13,7 @@ def encode(word):
 		bits = BitArray(BITS_USED)
 		bits.uint = len(symbols)
 		symbols[letter] = bits
-	
+
 	# the code we'll  return
 	code = BitStream()
 	
@@ -32,12 +32,12 @@ def encode(word):
 			
 		# otherwise
 		else:
-		
+			
 			# we add the previously known sequence to the code
 			code.append(symbols[sequence])
 			
 			# and add the new sequence to our dictionnary of known sequences
-			if len(symbols) < pow(2, BITS_USED):
+			if len(symbols) < 1<<BITS_USED:
 				bits = BitArray(BITS_USED)
 				bits.uint = len(symbols)
 				symbols[temp] = bits
@@ -47,7 +47,6 @@ def encode(word):
 	
 	# there is usually a last unincoded sequence to be added
 	code.append(symbols[sequence])
-	
 	
 	return code
 
@@ -62,40 +61,43 @@ def decode(code):
 	for letter in string.printable:
 		symbols.append(letter)
 	
-	# the previous sequence
-	previous = None
+	# the first sequence (a lone symbol)
+	previous = symbols[ code.read("uint:" + str(BITS_USED)) ]
+	readBits = BITS_USED
+	word += previous
+	
+	# NOTE : readBits is the number of bits we've read till now, would be usefull if we a dynamic value for BITS_USED
 	
 	# while there are still bits to read
-	readBits = 0
 	while readBits < len(code):
-		
-		readBits += BITS_USED
 		
 		# we read the current number in code
 		i = code.read("uint:" + str(BITS_USED))
+		readBits += BITS_USED
 		
 		# if it is within the known sequences
-		if i < len(symbols)-1 :
-			
+		if i < len(symbols) :
+
 			# we add its corresponding sequence from our list
-			word += symbols[i]
+			sequence = symbols[i]
+			word += sequence
 			
 			# if there was a previous sequence
-			if len(symbols) < pow(2, BITS_USED) and previous != None :
+			if len(symbols) < 1<<BITS_USED :
 				# we build a new sequence and add it to our known ones
 				# by concatenation  of the previous sequence and the first character of the current one
-				symbols.append(symbols[previous] + symbols[i][0])
+				symbols.append(previous + sequence[0])
+				
 		
 		else:
 			# special case : if during encoding the new sequence is used as soon as discovered,
 			# it is used before eing even in the decoding dictionnary. No worries though, just use the concatenation of first char to previous sequence
-			temp = symbols[previous] + symbols[previous][0]
-			word += temp
-			symbols.append(temp)
+			sequence = previous + previous[0]
+			word += sequence
+			if len(symbols) < 1<<BITS_USED:
+				symbols.append(sequence)
 			
-			
-		# we reset our considered sequence to be c
-		previous = i		
+		previous = sequence
 	
 	# NOTE : keep in mind that we are decompressing, so we are not iterating character by character like in encode(), but sequence by sequence
 	
